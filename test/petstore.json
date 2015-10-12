@@ -116,5 +116,13 @@
         }
       }
     }
+  },
+  "x-persistence": {
+    "type": "mongoose",
+    "models": {
+      "Pet": {
+        "plugins": ["pet-indexes"]
+      }
+    }
   }
 }

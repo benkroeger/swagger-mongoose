@@ -1,4 +1,4 @@
-![Travis Status](https://travis-ci.org/simonguest/swagger-mongoose.svg?branch=master)
+
 # swagger-mongoose
 
 Generate mongoose schemas and models from swagger documents
@@ -17,12 +17,39 @@ Simply pass your swagger document to the compile method, and then dynamically ac
 var swaggerMongoose = require('swagger-mongoose');
 
 var swagger = fs.readFileSync('./petstore.json');
-var Pet = swaggerMongoose.compile(swagger).models.Pet;
-var myPet = new Pet({
+swaggerMongoose(swagger, {db: mongoose, pluginsPath: __dirname}, function(err, result){
+  var Pet = result.models.Pet;
+  Pet.create({
     id: 123,
     name: 'Fluffy'
-    });
-myPet.save();
+  }, function(err, fluffy){
+    // do error handling and other stuff with fluffy here
+  });
+});
+```
+
+## Swagger vendor extension
+
+SwaggerMongoose now adds support for a vendor extension on top-level of the swagger spec file (in parallel to "definitions").
+The extension `x-persistence` allows you to define which of the `definitions` should actually be turned in to `models`.
+As of today, only the type `mongoose` is supported.
+Additionally, you can define mongoose plugins to be loaded for each model. The array `plugins` must contain strings only.
+These strings are joined with the global `options.pluginsPath` and loaded via `require` and the generic mongoose `Schema.plugin()` method.
+**In a future version, we want to support plugin options as well**
+
+```
+  {
+    "x-persistence": {
+      "type": "mongoose",
+      "models": {
+        "Pet": {
+          plugins: [
+            "my-plugin"
+          ]
+        }
+      }
+    }
+  }
 ```
 
 ## Limitations
